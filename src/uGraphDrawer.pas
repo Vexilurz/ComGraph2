@@ -11,18 +11,20 @@ type
     Chart: PChart;
     DataIndex: integer;
     VisibleDataIndex: integer;
-    const MaxChannels = 4;
+    MaxChannels: byte;   // number of channels, existing in program
+    TempValue: Pint64;
   public
     InputData: PMemory;
     MaxVisibleData: cardinal;
-    ChannelsCount: byte; // channels: 0..ChannelsCount-1, but
-                         // Series[ChannelsCount] is a "0" axis
-                         // [NOW DISABLED!]
-    BitsPerNumber: byte; //8, 16, 24, 32, 64
-    ChannelData: array [0..MaxChannels-1] of Int64;
-    Discrete, Scroll: boolean;
 
-    constructor Create(Chart: PChart);
+    ChannelsCount: byte; // how many channels choosed in user options
+                         // channels: 0..ChannelsCount-1, but
+                         // Series[ChannelsCount] is a "0" axis [NOW DISABLED!]
+    BitsPerNumber: byte; //8, 16, 24, 32, 64
+    ChannelData: array of Int64; // dunno how to do this with pointers =(
+    Scroll: boolean;
+
+    constructor Create(Chart: PChart; MaxChannels: byte);
     destructor Destroy; override;
 
     procedure ParseData;
@@ -33,22 +35,30 @@ implementation
 
 { TGraphDrawer }
 
-constructor TGraphDrawer.Create(Chart: PChart);
+constructor TGraphDrawer.Create(Chart: PChart; MaxChannels: byte);
 begin
   inherited Create;
+  self.MaxChannels := MaxChannels;
+  SetLength(ChannelData, MaxChannels); // yeah, yeah... it's bad... but i tried!
+//  ChannelData := AllocMem(MaxChannels * SizeOf(Int64));
+//  if ChannelData = nil then
+//    raise Exception.Create('TGraphDrawer.ChannelData: can''t alloc memory.');
   ChannelsCount := 1;
   BitsPerNumber := 32;
   DataIndex := 0;
   VisibleDataIndex := 0;
   MaxVisibleData := 256;
-  Discrete := false;
   Scroll := true;
   self.Chart := Chart;
 end;
 
 destructor TGraphDrawer.Destroy;
 begin
-
+//  if ChannelData <> nil then
+//  begin
+//    FreeMemory(ChannelData);
+//    ChannelData := nil;
+//  end;
   inherited;
 end;
 

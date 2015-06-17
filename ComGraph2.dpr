@@ -7,7 +7,8 @@ uses
   uComGraph in 'src\uComGraph.pas',
   uGraphDrawer in 'src\uGraphDrawer.pas',
   uMemory in 'src\uMemory.pas',
-  uGlobal in 'src\uGlobal.pas';
+  uGlobal in 'src\uGlobal.pas' {$R *.res},
+  uBuildInfo in 'src\uBuildInfo.pas';
 
 {$R *.res}
 

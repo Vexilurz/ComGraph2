@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, TeEngine, Series, TeeProcs, Chart, ExtCtrls, ComCtrls, ToolWin, Menus,
   ImgList, StdCtrls, Buttons, Spin, uCom, uComGraph, uGraphDrawer, uMemory,
-  uGlobal, IniFiles;
+  uGlobal, IniFiles, uBuildInfo;
 
 type
   TfmMain = class(TForm)
@@ -62,6 +62,8 @@ type
     cbBitsPerNumber: TComboBox;
     timerMain: TTimer;
     Series5: TFastLineSeries;
+    ToolButton2: TToolButton;
+    bnCalibr: TToolButton;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -87,6 +89,7 @@ type
     procedure SwitchEnabledField(FieldsEnable: boolean);
     procedure RenewChannelsActive;
     procedure ChangeAutoScale;
+    procedure ChangeDiscrete(isOn: boolean);
 
     procedure SetFields;
     procedure SetMaxVisibleData;
@@ -97,6 +100,7 @@ type
   end;
 
 const
+  MaxChannels = 4;
   cComGraph = 'ComGraph';
 
 var
@@ -116,23 +120,31 @@ implementation
 // ***** INTERFACE *****
 
 procedure TfmMain.menuExitClick(Sender: TObject);
-begin
-  Close;
-end;
+begin Close; end;
 
 function TfmMain.SquareDiscrete: boolean;
-begin
-  result := menuSquareDiscrete.Checked;
-end;
+begin result := menuSquareDiscrete.Checked; end;
 function TfmMain.GraphAutoScroll: boolean;
+begin result := menuGraphAutoScroll.Checked; end;
+
+procedure TfmMain.ChangeDiscrete(isOn: boolean);
+var
+  i: integer;
+  obj: TComponent;
 begin
-  result := menuGraphAutoScroll.Checked;
+  for i := 1 to MaxChannels do
+  begin
+    obj := FindComponent('Series'+IntToStr(i));
+    if obj <> nil then
+      (obj as TFastLineSeries).Stairs := isOn;
+  end;
 end;
+
 procedure TfmMain.menuSquareDiscreteClick(Sender: TObject);
 begin
   menuSquareDiscrete.Checked := not menuSquareDiscrete.Checked;
   bnSquareDiscrete.Down := menuSquareDiscrete.Checked;
-  GraphDrawer.Discrete := SquareDiscrete;
+  ChangeDiscrete(SquareDiscrete);
 end;
 procedure TfmMain.menuGraphAutoScrollClick(Sender: TObject);
 begin
@@ -164,11 +176,16 @@ begin
 end;
 
 procedure TfmMain.RenewChannelsActive;
+var
+  obj: TComponent;
+  i: integer;
 begin
-  Chart.Series[0].Active := cbChannel1.Checked;
-  Chart.Series[1].Active := cbChannel2.Checked;
-  Chart.Series[2].Active := cbChannel3.Checked;
-  Chart.Series[3].Active := cbChannel4.Checked;
+  for i := 1 to MaxChannels do
+  begin
+    obj := FindComponent('cbChannel'+IntToStr(i));
+    if obj <> nil then
+      Chart.Series[i-1].Active := (obj as TCheckBox).Checked;
+  end;
 end;
 procedure TfmMain.cbChannel1Click(Sender: TObject);
 begin
@@ -194,12 +211,16 @@ begin
   Chart.LeftAxis.Maximum := seMaxScale.Value;
   Chart.LeftAxis.Minimum := seMinScale.Value;
 end;
+
 procedure TfmMain.cbAutoScaleClick(Sender: TObject);
 begin
   ChangeAutoScale;
 end;
 
 procedure TfmMain.ConfigWrite;
+var
+  i: integer;
+  obj: TComponent;
 begin
   with Config do
   begin
@@ -209,10 +230,12 @@ begin
     WriteInteger(cComGraph,'Values',ValuesCount);
     WriteInteger(cComGraph,'BitsPerInd',cbBitsPerNumber.ItemIndex);
     WriteInteger(cComGraph,'Visible',tbMaxVisibleData.Position);
-    WriteBool   (cComGraph,'Channel1',cbChannel1.Checked);
-    WriteBool   (cComGraph,'Channel2',cbChannel2.Checked);
-    WriteBool   (cComGraph,'Channel3',cbChannel3.Checked);
-    WriteBool   (cComGraph,'Channel4',cbChannel4.Checked);
+    for i := 1 to MaxChannels do
+    begin
+      obj := FindComponent('cbChannel'+IntToStr(i));
+      if obj <> nil then
+        WriteBool(cComGraph,'Channel'+IntToStr(i), (obj as TCheckBox).Checked);
+    end;
     WriteBool   (cComGraph,'AutoScale',cbAutoScale.Checked);
     WriteInteger(cComGraph,'MIN',seMinScale.Value);
     WriteInteger(cComGraph,'MAX',seMaxScale.Value);
@@ -222,7 +245,8 @@ begin
 end;
 procedure TfmMain.ConfigRead;
 var
-  tmp: integer;
+  i, tmp: integer;
+  obj: TComponent;
 begin
   with Config do
   begin
@@ -241,21 +265,23 @@ begin
       tbMaxVisibleData.Position := tmp;
       SetMaxVisibleData;
     end;
-    cbChannel1.Checked := ReadBool(cComGraph,'Channel1',true);
-    cbChannel2.Checked := ReadBool(cComGraph,'Channel2',true);
-    cbChannel3.Checked := ReadBool(cComGraph,'Channel3',true);
-    cbChannel4.Checked := ReadBool(cComGraph,'Channel4',true);
-    RenewChannelsActive;
+    for i := 1 to MaxChannels do
+    begin
+      obj := FindComponent('cbChannel'+IntToStr(i));
+      if obj <> nil then
+        (obj as TCheckBox).Checked := ReadBool(cComGraph,'Channel'+IntToStr(i),true);
+    end;
+      RenewChannelsActive;
     cbAutoScale.Checked := ReadBool(cComGraph,'AutoScale',true);
-    ChangeAutoScale;
+      ChangeAutoScale;
     seMinScale.Value := ReadInteger(cComGraph,'MIN',-32768);
     seMaxScale.Value := ReadInteger(cComGraph,'MAX',32767);
     menuGraphAutoScroll.Checked := ReadBool(cComGraph, 'Scroll', true);
-    bnGraphAutoScroll.Down := GraphAutoScroll;
-    GraphDrawer.Scroll := GraphAutoScroll;
+      bnGraphAutoScroll.Down := GraphAutoScroll;
+      GraphDrawer.Scroll := GraphAutoScroll;
     menuSquareDiscrete.Checked  := ReadBool(cComGraph, 'Discrete', false);
-    bnSquareDiscrete.Down := SquareDiscrete;
-    GraphDrawer.Discrete := SquareDiscrete;
+      bnSquareDiscrete.Down := SquareDiscrete;
+      ChangeDiscrete(SquareDiscrete);
   end;
 end;
 
@@ -276,7 +302,7 @@ begin
   lbMaxData.Caption := 'Max visible data = ' + IntToStr(tbMaxVisibleData.Position);
   GraphDrawer.MaxVisibleData := tbMaxVisibleData.Position;
   Chart.BottomAxis.SetMinMax(0, tbMaxVisibleData.Position);
-  for i := 0 to 4 do
+  for i := 0 to MaxChannels-1 do
   begin
     if Chart.Series[i].Count > GraphDrawer.MaxVisibleData then
       for j := Chart.Series[i].Count-1 downto GraphDrawer.MaxVisibleData-1 do
@@ -299,15 +325,20 @@ begin
 end;
 
 procedure TfmMain.WorkOnce;
+var
+  i: integer;
+  obj: TComponent;
 begin
   IntFunc.SetStatus(stDataExchange);
   Application.ProcessMessages;
   ComGraph.SendAndGetData(seSendBefore.Value);
   GraphDrawer.DrawTick;
-  edChannel1.Text := IntToStr(GraphDrawer.ChannelData[0]);
-  edChannel2.Text := IntToStr(GraphDrawer.ChannelData[1]);
-  edChannel3.Text := IntToStr(GraphDrawer.ChannelData[2]);
-  edChannel4.Text := IntToStr(GraphDrawer.ChannelData[3]);
+  for i := 1 to MaxChannels do
+  begin
+    obj := FindComponent('edChannel'+IntToStr(i));
+    if obj <> nil then
+      (obj as TEdit).Text := IntToStr(GraphDrawer.ChannelData[i-1]);
+  end;
 end;
 
 procedure TfmMain.bnSingleReqClick(Sender: TObject);
@@ -351,6 +382,17 @@ begin
   timerMain.Enabled := isWork;
 end;
 
+procedure TfmMain.FormCreate(Sender: TObject);
+begin
+  Config := TIniFile.Create(ExtractFilePath(Application.ExeName)+'config.ini');
+  IntFunc := TInterfaceFunc.Create(@sbMain.Panels[1].Text);
+  ComGraph := TComGraph.Create(@IntFunc);
+  GraphDrawer := TGraphDrawer.Create(@Chart, MaxChannels);
+  ConfigRead;
+  bnComRefresh.Click;
+  Caption := Caption + ' Build '+GetBuild(Application.ExeName);
+end;
+
 procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   ConfigWrite;
@@ -360,16 +402,6 @@ begin
   ComGraph.Destroy;
   IntFunc.Destroy;
   Config.Destroy;
-end;
-
-procedure TfmMain.FormCreate(Sender: TObject);
-begin
-  Config := TIniFile.Create(ExtractFilePath(Application.ExeName)+'config.ini');
-  IntFunc := TInterfaceFunc.Create(@sbMain.Panels[1].Text);
-  ComGraph := TComGraph.Create(@IntFunc);
-  GraphDrawer := TGraphDrawer.Create(@Chart);
-  ConfigRead;
-  bnComRefresh.Click;
 end;
 
 initialization

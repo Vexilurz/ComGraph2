@@ -4,58 +4,43 @@ interface
 
 uses Windows, SysUtils;
 
-function GetVersion: string;
-function GetBuild: string;
+function GetAppVersion(PathToExe: string):string;
+function GetBuild(PathToExe: string): string;
 
 implementation
 
-function GetVersion: string;
+function GetAppVersion(PathToExe: string):string;
 var
-  dump: DWORD;
-  size: integer;
-  buffer: PChar;
-  VersionPointer, TransBuffer: PChar;
-  Temp: integer;
-  CalcLangCharSet: string;
-  NameApp: string;
+  Size, Size2: DWord;
+  Pt, Pt2: Pointer;
 begin
-  NameApp := paramstr(0);
-
-  size := GetFileVersionInfoSize(PChar(NameApp), dump);
-  buffer := StrAlloc(size+1);
-  try
-    GetFileVersionInfo(PChar(NameApp), 0, size, buffer);
-
-    VerQueryValue(buffer, '\VarFileInfo\Translation', pointer(TransBuffer),
-    dump);
-    if dump >= 4 then
-    begin
-      temp:=0;
-      StrLCopy(@temp, TransBuffer, 2);
-      CalcLangCharSet:=IntToHex(temp, 4);
-      StrLCopy(@temp, TransBuffer+2, 2);
-      CalcLangCharSet := CalcLangCharSet+IntToHex(temp, 4);
+  Result := '0.0.0.0';
+  Size := GetFileVersionInfoSize(PChar(PathToExe), Size2);
+  if Size > 0 then
+  begin
+    GetMem(Pt, Size);
+    try
+      GetFileVersionInfo(PChar(PathToExe), 0, Size, Pt);
+      VerQueryValue(Pt, '\', Pt2, Size2);
+      with TVSFixedFileInfo(Pt2^) do
+      begin
+        Result:= IntToStr(HiWord(dwFileVersionMS))+'.'+
+                 IntToStr(LoWord(dwFileVersionMS))+'.'+
+                 IntToStr(HiWord(dwFileVersionLS))+'.'+
+                 IntToStr(LoWord(dwFileVersionLS));
+      end;
+    finally
+      FreeMem(Pt);
     end;
-
-    VerQueryValue(buffer, pchar('\StringFileInfo\'+CalcLangCharSet+
-    '\'+'FileVersion'), pointer(VersionPointer), dump);
-    if (dump > 1) then
-    begin
-      Result := VersionPointer;
-    end
-    else
-      Result := '0.0.0.0';
-  finally
-    StrDispose(Buffer);
   end;
 end;
 
-function GetBuild: string;
+function GetBuild(PathToExe: string): string;
 var
   pos: integer;
   s: string;
 begin
-  s := GetVersion;
+  s := GetAppVersion(PathToExe);
   Result := '';
   Pos := Length(s);
   while (Pos >= 1) and (s[pos] <> '.') do
