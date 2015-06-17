@@ -1,19 +1,19 @@
-unit uGlobalComGraph;
+unit uComGraph;
 
 interface
 
-uses Windows, SysUtils, StdCtrls, Classes, uCom, uMemory;
+uses Windows, SysUtils, StdCtrls, Classes, uCom, uMemory, uGlobal;
 
 type
   PComboBox = ^TComboBox;
   TComGraph = class
   private
-
+    IntFunc: PInterfaceFunc;
   public
     Com: TCom;
     ComData: TMemory;
 
-    constructor Create;
+    constructor Create(IntFunc: PInterfaceFunc);
     destructor Destroy; override;
 
     procedure RefreshComList(ComboBox: PComboBox);
@@ -26,9 +26,10 @@ implementation
 
 { TComGraph }
 
-constructor TComGraph.Create;
+constructor TComGraph.Create(IntFunc: PInterfaceFunc);
 begin
-  inherited;
+  inherited Create;
+  self.IntFunc := IntFunc;
   ComData := TMemory.Create('ComGraphData');
   Com := TCom.Create;
 end;
@@ -51,6 +52,7 @@ end;
 
 procedure TComGraph.StartComSession(ComName: string);
 begin
+  IntFunc.SetStatus(stComOpen);
   if Com.isOpen and (Com.ComName <> ComName) then
     Com.Close;
 
@@ -63,7 +65,9 @@ end;
 
 procedure TComGraph.EndComSession;
 begin
+  IntFunc.SetStatus(stComClose);
   Com.Close;
+  IntFunc.SetStatus(stReady);
 end;
 
 procedure TComGraph.RefreshComList(ComboBox: PComboBox);

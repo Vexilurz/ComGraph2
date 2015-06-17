@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 0
-  Top = 0
+  Left = 480
+  Top = 231
   Caption = 'COM Graph v2.0'
   ClientHeight = 661
   ClientWidth = 931
@@ -10,9 +10,20 @@ object fmMain: TfmMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  Icon.Data = {
+    0000010001001010100000000000280100001600000028000000100000002000
+    00000100040000000000C0000000000000000000000000000000000000000000
+    0000000080000080000000808000800000008000800080800000C0C0C0008080
+    80000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000
+    0000000000000000000000000000000090000000000000A909000000A0000A09
+    0900000A0A000A9A0090000A0990A090A09000A090A00090A00900A090000090
+    A00090A0900099000A009A00900000000A0009090000000000A0A90900000000
+    00A0A09000000000000A0000000000000000000000000000000000000000FFFF
+    0000FEFF0000F6FF0000CAF70000AAEB00008CE9000054D5000000000000D657
+    00003A370000FAAF0000FC2F0000FC5F0000FEFF0000FEFF0000FFFF0000}
   Menu = MainMenu1
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -168,7 +179,6 @@ object fmMain: TfmMain
       Top = 25
       Width = 83
       Height = 21
-      Style = csDropDownList
       TabOrder = 0
     end
     object bnComRefresh: TBitBtn
@@ -244,6 +254,7 @@ object fmMain: TfmMain
       ParentFont = False
       State = cbChecked
       TabOrder = 4
+      OnClick = cbChannel1Click
     end
     object cbChannel2: TCheckBox
       Left = 8
@@ -260,6 +271,7 @@ object fmMain: TfmMain
       ParentFont = False
       State = cbChecked
       TabOrder = 5
+      OnClick = cbChannel1Click
     end
     object cbChannel3: TCheckBox
       Left = 8
@@ -276,6 +288,7 @@ object fmMain: TfmMain
       ParentFont = False
       State = cbChecked
       TabOrder = 6
+      OnClick = cbChannel1Click
     end
     object cbChannel4: TCheckBox
       Left = 8
@@ -292,8 +305,9 @@ object fmMain: TfmMain
       ParentFont = False
       State = cbChecked
       TabOrder = 7
+      OnClick = cbChannel1Click
     end
-    object seMaxData: TSpinEdit
+    object seValuesCount: TSpinEdit
       Left = 8
       Top = 168
       Width = 121
@@ -364,7 +378,7 @@ object fmMain: TfmMain
       Top = 452
       Width = 97
       Height = 17
-      Caption = 'Auto scale'
+      Caption = 'Y Auto scale'
       Checked = True
       State = cbChecked
       TabOrder = 13
@@ -446,13 +460,10 @@ object fmMain: TfmMain
       Width = 121
       Height = 21
       Style = csDropDownList
-      ItemIndex = 6
+      ItemIndex = 3
       TabOrder = 18
       Text = '32'
       Items.Strings = (
-        '1'
-        '2'
-        '4'
         '8'
         '16'
         '24'
@@ -536,6 +547,18 @@ object fmMain: TfmMain
         YValues.Name = 'Y'
         YValues.Order = loNone
       end
+      object Series5: TFastLineSeries
+        Marks.Arrow.Visible = True
+        Marks.Callout.Brush.Color = clBlack
+        Marks.Callout.Arrow.Visible = True
+        Marks.Visible = False
+        SeriesColor = clBlack
+        LinePen.Width = 2
+        XValues.Name = 'X'
+        XValues.Order = loAscending
+        YValues.Name = 'Y'
+        YValues.Order = loNone
+      end
     end
     object tbMaxVisibleData: TTrackBar
       Left = 1
@@ -583,7 +606,7 @@ object fmMain: TfmMain
     Left = 512
     Top = 320
     Bitmap = {
-      494C0101050008007C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101050008008C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

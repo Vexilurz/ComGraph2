@@ -2,17 +2,19 @@ program ComGraph2;
 
 uses
   Forms,
-  uMainComGraph in 'src\uMainComGraph.pas' {fmMain},
+  uMain in 'src\uMain.pas' {fmMain},
   uCom in 'src\uCom.pas' {$R *.res},
-  uGlobalComGraph in 'src\uGlobalComGraph.pas',
+  uComGraph in 'src\uComGraph.pas',
   uGraphDrawer in 'src\uGraphDrawer.pas',
-  uMemory in 'src\uMemory.pas';
+  uMemory in 'src\uMemory.pas',
+  uGlobal in 'src\uGlobal.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
+  Application.Title := 'ComGraph2';
   Application.CreateForm(TfmMain, fmMain);
   Application.Run;
 end.
