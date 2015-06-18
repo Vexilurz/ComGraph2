@@ -75,30 +75,6 @@ object fmMain: TfmMain
       ImageIndex = 1
       Style = tbsSeparator
     end
-    object bnCalibr: TToolButton
-      Left = 59
-      Top = 0
-      Hint = 'Calibration form for PFKD project'
-      Caption = 'bnCalibr'
-      ImageIndex = 5
-      ParentShowHint = False
-      ShowHint = True
-    end
-    object ToolButton4: TToolButton
-      Left = 86
-      Top = 0
-      Width = 5
-      Caption = 'ToolButton4'
-      ImageIndex = 3
-      Style = tbsSeparator
-    end
-    object ToolButton1: TToolButton
-      Left = 91
-      Top = 0
-      Caption = 'Exit'
-      ImageIndex = 0
-      MenuItem = menuExit
-    end
   end
   object sbMain: TStatusBar
     Left = 0
@@ -509,8 +485,6 @@ object fmMain: TfmMain
       View3DWalls = False
       Align = alClient
       TabOrder = 0
-      ExplicitLeft = 0
-      ExplicitTop = -5
       PrintMargins = (
         15
         8
@@ -566,19 +540,6 @@ object fmMain: TfmMain
         YValues.Name = 'Y'
         YValues.Order = loNone
       end
-      object Series5: TFastLineSeries
-        Active = False
-        Marks.Arrow.Visible = True
-        Marks.Callout.Brush.Color = clBlack
-        Marks.Callout.Arrow.Visible = True
-        Marks.Visible = False
-        SeriesColor = clBlack
-        LinePen.Width = 2
-        XValues.Name = 'X'
-        XValues.Order = loAscending
-        YValues.Name = 'Y'
-        YValues.Order = loNone
-      end
     end
     object tbMaxVisibleData: TTrackBar
       Left = 1
@@ -626,7 +587,7 @@ object fmMain: TfmMain
     Left = 512
     Top = 320
     Bitmap = {
-      494C010106000800E00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010106000800E40010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

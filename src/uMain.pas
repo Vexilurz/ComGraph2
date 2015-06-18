@@ -24,7 +24,6 @@ type
     Series3: TFastLineSeries;
     Series4: TFastLineSeries;
     ilToolBar: TImageList;
-    ToolButton1: TToolButton;
     cbCOM: TComboBox;
     bnComRefresh: TBitBtn;
     Label1: TLabel;
@@ -58,12 +57,9 @@ type
     Label8: TLabel;
     bnSquareDiscrete: TToolButton;
     bnGraphAutoScroll: TToolButton;
-    ToolButton4: TToolButton;
     cbBitsPerNumber: TComboBox;
     timerMain: TTimer;
-    Series5: TFastLineSeries;
     ToolButton2: TToolButton;
-    bnCalibr: TToolButton;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -88,6 +84,7 @@ type
     function ChannelsCount: byte;
     procedure SwitchEnabledField(FieldsEnable: boolean);
     procedure RenewChannelsActive;
+    procedure RefreshChannelsCheckbox;
     procedure ChangeAutoScale;
     procedure ChangeDiscrete(isOn: boolean);
 
@@ -100,11 +97,11 @@ type
   end;
 
 const
-  MaxChannels = 4;
   cComGraph = 'ComGraph';
 
 var
   fmMain: TfmMain;
+  MaxChannels: byte = 4;
   isWork: boolean = false;
   ComGraph: TComGraph;
   GraphDrawer: TGraphDrawer;
@@ -175,6 +172,17 @@ begin
 //  tbMaxVisibleData.Enabled := FieldsEnable;
 end;
 
+procedure TfmMain.RefreshChannelsCheckbox;
+var
+  i: integer;
+begin
+  cbChannelsCount.Items.Clear;
+  for i := 1 to MaxChannels do
+  begin
+    cbChannelsCount.Items.Add(IntToStr(i));
+  end;
+end;
+
 procedure TfmMain.RenewChannelsActive;
 var
   obj: TComponent;
@@ -193,17 +201,11 @@ begin
 end;
 
 function TfmMain.ValuesCount: cardinal;
-begin
-  result := seValuesCount.Value;
-end;
+begin result := seValuesCount.Value; end;
 function TfmMain.BitsPerNumber: byte;
-begin
-  result := StrToInt(cbBitsPerNumber.Text);
-end;
+begin result := StrToInt(cbBitsPerNumber.Text); end;
 function TfmMain.ChannelsCount: byte;
-begin
-  result := cbChannelsCount.ItemIndex+1;
-end;
+begin result := cbChannelsCount.ItemIndex+1; end;
 
 procedure TfmMain.ChangeAutoScale;
 begin
@@ -384,6 +386,8 @@ end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
 begin
+  MaxChannels := Chart.SeriesCount;
+  RefreshChannelsCheckbox;
   Config := TIniFile.Create(ExtractFilePath(Application.ExeName)+'config.ini');
   IntFunc := TInterfaceFunc.Create(@sbMain.Panels[1].Text);
   ComGraph := TComGraph.Create(@IntFunc);

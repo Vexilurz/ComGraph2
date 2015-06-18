@@ -18,8 +18,6 @@ type
     MaxVisibleData: cardinal;
 
     ChannelsCount: byte; // how many channels choosed in user options
-                         // channels: 0..ChannelsCount-1, but
-                         // Series[ChannelsCount] is a "0" axis [NOW DISABLED!]
     BitsPerNumber: byte; //8, 16, 24, 32, 64
     ChannelData: array of Int64; // dunno how to do this with pointers =(
     Scroll: boolean;
@@ -69,7 +67,9 @@ var
   i, j: integer;
   data: byte;
   value: int64;
+  sign: byte;
   lastDataIndex: cardinal;
+  signBit: int64;
 begin
   for i := 0 to ChannelsCount - 1 do
   begin
@@ -92,6 +92,9 @@ begin
         inc(DataIndex);
       end;
 //    end;
+    signBit := 1 shl (BitsPerNumber -1);
+    if value and signBit <> 0 then
+      value := value or not (signBit - 1);
     ChannelData[i] := value;
   end;
 end;
@@ -113,11 +116,7 @@ begin
         else
           Chart.Series[i].AddY(ChannelData[i]);
       end;
-      // just "0" axis
-//      if VisibleDataIndex < Chart.Series[ChannelsCount].Count then
-//        Chart.Series[ChannelsCount].YValue[VisibleDataIndex] := 0
-//      else
-//        Chart.Series[ChannelsCount].AddY(0);
+
       if VisibleDataIndex >= MaxVisibleData then
         VisibleDataIndex := 0
       else
