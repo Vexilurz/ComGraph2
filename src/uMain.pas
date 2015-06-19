@@ -60,6 +60,9 @@ type
     cbBitsPerNumber: TComboBox;
     timerMain: TTimer;
     ToolButton2: TToolButton;
+    bnNumbersSign: TToolButton;
+    menuNumbersSign: TMenuItem;
+    N1: TMenuItem;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -72,13 +75,12 @@ type
     procedure tbMaxVisibleDataChange(Sender: TObject);
     procedure timerMainTimer(Sender: TObject);
     procedure cbChannel1Click(Sender: TObject);
+    procedure menuNumbersSignClick(Sender: TObject);
   private
     { Private declarations }
     procedure ConfigRead;
     procedure ConfigWrite;
 
-    function SquareDiscrete: boolean;
-    function GraphAutoScroll: boolean;
     function ValuesCount: cardinal;
     function BitsPerNumber: byte;
     function ChannelsCount: byte;
@@ -119,11 +121,6 @@ implementation
 procedure TfmMain.menuExitClick(Sender: TObject);
 begin Close; end;
 
-function TfmMain.SquareDiscrete: boolean;
-begin result := menuSquareDiscrete.Checked; end;
-function TfmMain.GraphAutoScroll: boolean;
-begin result := menuGraphAutoScroll.Checked; end;
-
 procedure TfmMain.ChangeDiscrete(isOn: boolean);
 var
   i: integer;
@@ -141,13 +138,19 @@ procedure TfmMain.menuSquareDiscreteClick(Sender: TObject);
 begin
   menuSquareDiscrete.Checked := not menuSquareDiscrete.Checked;
   bnSquareDiscrete.Down := menuSquareDiscrete.Checked;
-  ChangeDiscrete(SquareDiscrete);
+  ChangeDiscrete(menuSquareDiscrete.Checked);
 end;
 procedure TfmMain.menuGraphAutoScrollClick(Sender: TObject);
 begin
   menuGraphAutoScroll.Checked := not menuGraphAutoScroll.Checked;
   bnGraphAutoScroll.Down := menuGraphAutoScroll.Checked;
-  GraphDrawer.Scroll := GraphAutoScroll;
+  GraphDrawer.Scroll := menuGraphAutoScroll.Checked;
+end;
+procedure TfmMain.menuNumbersSignClick(Sender: TObject);
+begin
+  menuNumbersSign.Checked := not menuNumbersSign.Checked;
+  bnNumbersSign.Down := menuNumbersSign.Checked;
+  GraphDrawer.SignEnabled := menuNumbersSign.Checked;
 end;
 
 procedure TfmMain.tbMaxVisibleDataChange(Sender: TObject);
@@ -241,8 +244,9 @@ begin
     WriteBool   (cComGraph,'AutoScale',cbAutoScale.Checked);
     WriteInteger(cComGraph,'MIN',seMinScale.Value);
     WriteInteger(cComGraph,'MAX',seMaxScale.Value);
-    WriteBool   (cComGraph,'Scroll',menuGraphAutoScroll.Checked);
+    WriteBool   (cComGraph,'Scroll',GraphDrawer.Scroll);
     WriteBool   (cComGraph,'Discrete',menuSquareDiscrete.Checked);
+    WriteBool   (cComGraph,'Sign',GraphDrawer.SignEnabled);
   end;
 end;
 procedure TfmMain.ConfigRead;
@@ -279,11 +283,14 @@ begin
     seMinScale.Value := ReadInteger(cComGraph,'MIN',-32768);
     seMaxScale.Value := ReadInteger(cComGraph,'MAX',32767);
     menuGraphAutoScroll.Checked := ReadBool(cComGraph, 'Scroll', true);
-      bnGraphAutoScroll.Down := GraphAutoScroll;
-      GraphDrawer.Scroll := GraphAutoScroll;
-    menuSquareDiscrete.Checked  := ReadBool(cComGraph, 'Discrete', false);
-      bnSquareDiscrete.Down := SquareDiscrete;
-      ChangeDiscrete(SquareDiscrete);
+      bnGraphAutoScroll.Down := menuGraphAutoScroll.Checked;
+      GraphDrawer.Scroll := menuGraphAutoScroll.Checked;
+    menuSquareDiscrete.Checked := ReadBool(cComGraph, 'Discrete', false);
+      bnSquareDiscrete.Down := menuSquareDiscrete.Checked;
+      ChangeDiscrete(menuSquareDiscrete.Checked);
+    menuNumbersSign.Checked := ReadBool(cComGraph, 'Sign', true);
+      bnNumbersSign.Down := menuNumbersSign.Checked;
+      GraphDrawer.SignEnabled := menuNumbersSign.Checked;
   end;
 end;
 
@@ -303,14 +310,20 @@ var
 begin
   lbMaxData.Caption := 'Max visible data = ' + IntToStr(tbMaxVisibleData.Position);
   GraphDrawer.MaxVisibleData := tbMaxVisibleData.Position;
-  Chart.BottomAxis.SetMinMax(0, tbMaxVisibleData.Position);
+  Chart.BottomAxis.SetMinMax(0, tbMaxVisibleData.Position-1);
   for i := 0 to MaxChannels-1 do
   begin
-    if Chart.Series[i].Count > GraphDrawer.MaxVisibleData then
-      for j := Chart.Series[i].Count-1 downto GraphDrawer.MaxVisibleData-1 do
-      begin
+    Chart.Series[i].BeginUpdate;
+    for j := 0 to Chart.Series[i].Count - GraphDrawer.MaxVisibleData - 1 do
+    begin
+      try
         Chart.Series[i].Delete(j);
+      except else
       end;
+    end;
+    for j := 0 to Chart.Series[i].Count - 1 do
+      Chart.Series[i].XValue[j] := j;
+    Chart.Series[i].EndUpdate;
   end;
 end;
 
@@ -353,7 +366,6 @@ end;
 
 procedure TfmMain.timerMainTimer(Sender: TObject);
 begin
-//  Application.ProcessMessages;
   WorkOnce;
 end;
 

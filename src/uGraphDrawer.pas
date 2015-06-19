@@ -21,10 +21,12 @@ type
     BitsPerNumber: byte; //8, 16, 24, 32, 64
     ChannelData: array of Int64; // dunno how to do this with pointers =(
     Scroll: boolean;
+    SignEnabled: boolean;
 
     constructor Create(Chart: PChart; MaxChannels: byte);
     destructor Destroy; override;
 
+    procedure Start;
     procedure ParseData;
     procedure DrawTick; // one tick to draw new data
   end;
@@ -38,25 +40,19 @@ begin
   inherited Create;
   self.MaxChannels := MaxChannels;
   SetLength(ChannelData, MaxChannels); // yeah, yeah... it's bad... but i tried!
-//  ChannelData := AllocMem(MaxChannels * SizeOf(Int64));
-//  if ChannelData = nil then
-//    raise Exception.Create('TGraphDrawer.ChannelData: can''t alloc memory.');
   ChannelsCount := 1;
   BitsPerNumber := 32;
   DataIndex := 0;
   VisibleDataIndex := 0;
   MaxVisibleData := 256;
   Scroll := true;
+  SignEnabled := true;
   self.Chart := Chart;
 end;
 
 destructor TGraphDrawer.Destroy;
 begin
-//  if ChannelData <> nil then
-//  begin
-//    FreeMemory(ChannelData);
-//    ChannelData := nil;
-//  end;
+
   inherited;
 end;
 
@@ -93,31 +89,39 @@ begin
       end;
 //    end;
     signBit := 1 shl (BitsPerNumber -1);
-    if value and signBit <> 0 then
+    if SignEnabled and (value and signBit <> 0) then
       value := value or not (signBit - 1);
     ChannelData[i] := value;
   end;
 end;
 
+procedure TGraphDrawer.Start;
+begin
+  VisibleDataIndex := 0;
+end;
+
 procedure TGraphDrawer.DrawTick;
 var
   i, j: cardinal;
+  tmp: integer;
 begin
   DataIndex := 0;
   while DataIndex < InputData.MaxData do
   begin
     ParseData;
-    if Scroll = false then
+    if not Scroll then
     begin
       for i := 0 to ChannelsCount-1 do
       begin
+        //Chart.Series[i].BeginUpdate;
         if VisibleDataIndex < Chart.Series[i].Count then
           Chart.Series[i].YValue[VisibleDataIndex] := ChannelData[i]
         else
           Chart.Series[i].AddY(ChannelData[i]);
+        //Chart.Series[i].EndUpdate;
       end;
 
-      if VisibleDataIndex >= MaxVisibleData then
+      if VisibleDataIndex >= MaxVisibleData - 1 then
         VisibleDataIndex := 0
       else
         inc(VisibleDataIndex);
@@ -126,21 +130,18 @@ begin
     begin // Scroll = true
       for i := 0 to ChannelsCount-1 do
       begin
-        if VisibleDataIndex < Chart.Series[i].Count then
+        Chart.Series[i].BeginUpdate;
+        if Chart.Series[i].Count >= MaxVisibleData then
         begin
-          for j := 1 to Chart.Series[i].Count-1 do
-          begin
-            Chart.Series[i].YValue[j-1] := Chart.Series[i].YValue[j];
+          try
+            Chart.Series[i].Delete(0);
+          except else
           end;
-          Chart.Series[i].YValue[MaxVisibleData] := ChannelData[i];
-        end
-        else
-          Chart.Series[i].AddY(ChannelData[i]);
-
-        if VisibleDataIndex < MaxVisibleData then
-          inc(VisibleDataIndex)
-        else
-          VisibleDataIndex := MaxVisibleData;
+        end;
+        Chart.Series[i].AddXY(Chart.Series[i].Count, ChannelData[i]);
+        for j := 0 to Chart.Series[i].Count - 1 do
+          Chart.Series[i].XValue[j] := j;
+        Chart.Series[i].EndUpdate;
       end;
     end;
   end;
