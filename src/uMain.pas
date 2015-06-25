@@ -373,24 +373,32 @@ procedure TfmMain.bnStartStopClick(Sender: TObject);
 begin
   if isWork then
   begin
-    with bnStartStop do
-    begin
-      Kind := bkIgnore;
-      Caption := 'Start';
+    if ComGraph.Com.isOpen then
+      begin
+      with bnStartStop do
+      begin
+        Kind := bkIgnore;
+        Caption := 'Start';
+      end;
+      ComGraph.EndComSession;
+      isWork := false;
     end;
-    ComGraph.EndComSession;
   end
   else
   begin
-    with bnStartStop do
+    if not ComGraph.Com.isOpen then
+      ComGraph.StartComSession(cbCOM.text);
+    if ComGraph.Com.isOpen then
     begin
-      Kind := bkNo;
-      Caption := 'Stop';
+      with bnStartStop do
+      begin
+        Kind := bkNo;
+        Caption := 'Stop';
+      end;
+      SetFields;
+      isWork := true;
     end;
-    SetFields;
-    ComGraph.StartComSession(cbCOM.text);
   end;
-  isWork := not isWork;
   SwitchEnabledField(not isWork);
   bnStartStop.ModalResult := mrNone;
   timerMain.Enabled := isWork;
@@ -406,7 +414,8 @@ begin
   GraphDrawer := TGraphDrawer.Create(@Chart, MaxChannels);
   ConfigRead;
   bnComRefresh.Click;
-  Caption := Caption + ' Build '+GetBuild(Application.ExeName);
+  Caption := Caption + ' Build '+GetBuild(Application.ExeName)+
+    '. Vexilurz (c) Measurements Systems.';
 end;
 
 procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);

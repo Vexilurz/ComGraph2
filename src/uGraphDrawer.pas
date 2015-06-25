@@ -26,7 +26,6 @@ type
     constructor Create(Chart: PChart; MaxChannels: byte);
     destructor Destroy; override;
 
-    procedure Start;
     procedure ParseData;
     procedure DrawTick; // one tick to draw new data
   end;
@@ -93,11 +92,6 @@ begin
       value := value or not (signBit - 1);
     ChannelData[i] := value;
   end;
-end;
-
-procedure TGraphDrawer.Start;
-begin
-  VisibleDataIndex := 0;
 end;
 
 procedure TGraphDrawer.DrawTick;
