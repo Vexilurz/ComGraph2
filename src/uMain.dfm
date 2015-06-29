@@ -1,6 +1,6 @@
 object fmMain: TfmMain
-  Left = 480
-  Top = 231
+  Left = 0
+  Top = 0
   Caption = 'COM Graph v2.0'
   ClientHeight = 661
   ClientWidth = 931
@@ -176,6 +176,13 @@ object fmMain: TfmMain
       Width = 79
       Height = 13
       Caption = 'Bits per number:'
+    end
+    object Label9: TLabel
+      Left = 108
+      Top = 523
+      Width = 50
+      Height = 13
+      Caption = 'Req. freq.'
     end
     object cbCOM: TComboBox
       Left = 8
@@ -410,7 +417,7 @@ object fmMain: TfmMain
     object bnStartStop: TBitBtn
       Left = 8
       Top = 522
-      Width = 121
+      Width = 97
       Height = 25
       Caption = 'Start'
       DoubleBuffered = True
@@ -439,7 +446,7 @@ object fmMain: TfmMain
     object bnSingleReq: TBitBtn
       Left = 8
       Top = 553
-      Width = 121
+      Width = 97
       Height = 25
       Caption = 'Single request'
       Default = True
@@ -472,6 +479,16 @@ object fmMain: TfmMain
         '24'
         '32'
         '64')
+    end
+    object seTimerFreq: TSpinEdit
+      Left = 106
+      Top = 539
+      Width = 52
+      Height = 22
+      MaxValue = 60000
+      MinValue = 1
+      TabOrder = 19
+      Value = 1
     end
   end
   object Panel2: TPanel
@@ -605,7 +622,7 @@ object fmMain: TfmMain
     Left = 512
     Top = 320
     Bitmap = {
-      494C01010700E801FC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010700E801080110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

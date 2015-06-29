@@ -63,6 +63,8 @@ type
     bnNumbersSign: TToolButton;
     menuNumbersSign: TMenuItem;
     N1: TMenuItem;
+    seTimerFreq: TSpinEdit;
+    Label9: TLabel;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -172,6 +174,7 @@ begin
   bnSingleReq.Enabled := FieldsEnable;
   bnComRefresh.Enabled := FieldsEnable;
   cbBitsPerNumber.Enabled := FieldsEnable;
+  seTimerFreq.Enabled := FieldsEnable;
 //  tbMaxVisibleData.Enabled := FieldsEnable;
 end;
 
@@ -247,6 +250,7 @@ begin
     WriteBool   (cComGraph,'Scroll',GraphDrawer.Scroll);
     WriteBool   (cComGraph,'Discrete',menuSquareDiscrete.Checked);
     WriteBool   (cComGraph,'Sign',GraphDrawer.SignEnabled);
+    WriteInteger(cComGraph,'TimerFreq',seTimerFreq.Value);
   end;
 end;
 procedure TfmMain.ConfigRead;
@@ -291,6 +295,7 @@ begin
     menuNumbersSign.Checked := ReadBool(cComGraph, 'Sign', true);
       bnNumbersSign.Down := menuNumbersSign.Checked;
       GraphDrawer.SignEnabled := menuNumbersSign.Checked;
+    seTimerFreq.Value := ReadInteger(cComGraph,'TimerFreq',1);
   end;
 end;
 
@@ -396,6 +401,7 @@ begin
         Caption := 'Stop';
       end;
       SetFields;
+      timerMain.Interval := seTimerFreq.Value;
       isWork := true;
     end;
   end;
