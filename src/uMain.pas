@@ -65,6 +65,10 @@ type
     N1: TMenuItem;
     seTimerFreq: TSpinEdit;
     Label9: TLabel;
+    ToolButton1: TToolButton;
+    bnLogsEn: TToolButton;
+    N2: TMenuItem;
+    menuLogsEn: TMenuItem;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -78,6 +82,7 @@ type
     procedure timerMainTimer(Sender: TObject);
     procedure cbChannel1Click(Sender: TObject);
     procedure menuNumbersSignClick(Sender: TObject);
+    procedure menuLogsEnClick(Sender: TObject);
   private
     { Private declarations }
     procedure ConfigRead;
@@ -96,6 +101,7 @@ type
     procedure SetMaxVisibleData;
     procedure WorkOnce; // - needs opened COM port
     function CalcMaxData: cardinal;
+    function GetLogFileName: string;
   public
     { Public declarations }
   end;
@@ -148,6 +154,12 @@ begin
   bnGraphAutoScroll.Down := menuGraphAutoScroll.Checked;
   GraphDrawer.Scroll := menuGraphAutoScroll.Checked;
 end;
+procedure TfmMain.menuLogsEnClick(Sender: TObject);
+begin
+  menuLogsEn.Checked := not menuLogsEn.Checked;
+  bnLogsEn.Down := menuLogsEn.Checked;
+  GraphDrawer.LogsEnabled := menuLogsEn.Checked;
+end;
 procedure TfmMain.menuNumbersSignClick(Sender: TObject);
 begin
   menuNumbersSign.Checked := not menuNumbersSign.Checked;
@@ -175,7 +187,6 @@ begin
   bnComRefresh.Enabled := FieldsEnable;
   cbBitsPerNumber.Enabled := FieldsEnable;
   seTimerFreq.Enabled := FieldsEnable;
-//  tbMaxVisibleData.Enabled := FieldsEnable;
 end;
 
 procedure TfmMain.RefreshChannelsCheckbox;
@@ -250,6 +261,7 @@ begin
     WriteBool   (cComGraph,'Scroll',GraphDrawer.Scroll);
     WriteBool   (cComGraph,'Discrete',menuSquareDiscrete.Checked);
     WriteBool   (cComGraph,'Sign',GraphDrawer.SignEnabled);
+    WriteBool   (cComGraph,'LogsEn',GraphDrawer.LogsEnabled);
     WriteInteger(cComGraph,'TimerFreq',seTimerFreq.Value);
   end;
 end;
@@ -295,8 +307,17 @@ begin
     menuNumbersSign.Checked := ReadBool(cComGraph, 'Sign', true);
       bnNumbersSign.Down := menuNumbersSign.Checked;
       GraphDrawer.SignEnabled := menuNumbersSign.Checked;
+    menuLogsEn.Checked := ReadBool(cComGraph, 'LogsEn', true);
+      bnLogsEn.Down := menuLogsEn.Checked;
+      GraphDrawer.LogsEnabled := menuLogsEn.Checked;
     seTimerFreq.Value := ReadInteger(cComGraph,'TimerFreq',1);
   end;
+end;
+
+function TfmMain.GetLogFileName: string;
+begin
+  result := 'Logs/'+FormatDateTime('dd.mm.yyyy_hh-mm-ss', now)+
+      '_send'+IntToStr(seSendBefore.Value)+'_'+FloatToStr(now)+'.log';
 end;
 
 // ***** LOGIC *****
@@ -365,7 +386,10 @@ procedure TfmMain.bnSingleReqClick(Sender: TObject);
 begin
   SetFields;
   ComGraph.StartComSession(cbCOM.text);
+  if GraphDrawer.LogsEnabled then
+    GraphDrawer.NewLogFile(GetLogFileName);
   WorkOnce;
+  GraphDrawer.CloseLogFile;
   ComGraph.EndComSession;
 end;
 
@@ -386,6 +410,7 @@ begin
         Caption := 'Start';
       end;
       ComGraph.EndComSession;
+      GraphDrawer.CloseLogFile;
       isWork := false;
     end;
   end
@@ -402,6 +427,8 @@ begin
       end;
       SetFields;
       timerMain.Interval := seTimerFreq.Value;
+      if GraphDrawer.LogsEnabled then
+        GraphDrawer.NewLogFile(GetLogFileName);
       isWork := true;
     end;
   end;

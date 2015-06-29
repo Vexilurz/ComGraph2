@@ -13,6 +13,9 @@ type
     VisibleDataIndex: integer;
     MaxChannels: byte;   // number of channels, existing in program
     TempValue: Pint64;
+
+    LogFile: textfile;
+    LogXpos: cardinal;
   public
     InputData: PMemory;
     MaxVisibleData: cardinal;
@@ -22,12 +25,15 @@ type
     ChannelData: array of Int64; // dunno how to do this with pointers =(
     Scroll: boolean;
     SignEnabled: boolean;
+    LogsEnabled: boolean;
 
     constructor Create(Chart: PChart; MaxChannels: byte);
     destructor Destroy; override;
 
     procedure ParseData;
     procedure DrawTick; // one tick to draw new data
+    procedure NewLogFile(filename: string);
+    procedure CloseLogFile;
   end;
 
 implementation
@@ -46,7 +52,9 @@ begin
   MaxVisibleData := 256;
   Scroll := true;
   SignEnabled := true;
+  LogsEnabled := true;
   self.Chart := Chart;
+  LogXpos := 0;
 end;
 
 destructor TGraphDrawer.Destroy;
@@ -98,11 +106,13 @@ procedure TGraphDrawer.DrawTick;
 var
   i, j: cardinal;
   tmp: integer;
+  LogStr: string;
 begin
   DataIndex := 0;
   while DataIndex < InputData.MaxData do
   begin
     ParseData;
+    LogStr := IntToStr(LogXpos)+#9;
     if not Scroll then
     begin
       for i := 0 to ChannelsCount-1 do
@@ -113,6 +123,12 @@ begin
         else
           Chart.Series[i].AddY(ChannelData[i]);
         //Chart.Series[i].EndUpdate;
+        LogStr := LogStr + IntToStr(ChannelData[i])+#9;
+      end;
+      if LogsEnabled then
+      begin
+        WriteLn(LogFile, LogStr);
+        inc(LogXpos);
       end;
 
       if VisibleDataIndex >= MaxVisibleData - 1 then
@@ -133,12 +149,33 @@ begin
           end;
         end;
         Chart.Series[i].AddXY(Chart.Series[i].Count, ChannelData[i]);
+        LogStr := LogStr + IntToStr(ChannelData[i])+#9;
         for j := 0 to Chart.Series[i].Count - 1 do
           Chart.Series[i].XValue[j] := j;
         Chart.Series[i].EndUpdate;
       end;
+      if LogsEnabled then
+      begin
+        WriteLn(LogFile, LogStr);
+        inc(LogXpos);
+      end;
     end;
   end;
+end;
+
+procedure TGraphDrawer.CloseLogFile;
+begin
+  try
+    CloseFile(LogFile);
+  except else end;
+end;
+
+procedure TGraphDrawer.NewLogFile(filename: string);
+begin
+  CloseLogFile;
+  AssignFile(LogFile, filename);
+  Rewrite(LogFile);
+  LogXpos := 0;
 end;
 
 end.
