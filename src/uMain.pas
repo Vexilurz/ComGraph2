@@ -69,6 +69,9 @@ type
     bnLogsEn: TToolButton;
     N2: TMenuItem;
     menuLogsEn: TMenuItem;
+    bnOpenLog: TToolButton;
+    menuOpenLog: TMenuItem;
+    dlgOpen: TOpenDialog;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -83,6 +86,7 @@ type
     procedure cbChannel1Click(Sender: TObject);
     procedure menuNumbersSignClick(Sender: TObject);
     procedure menuLogsEnClick(Sender: TObject);
+    procedure menuOpenLogClick(Sender: TObject);
   private
     { Private declarations }
     procedure ConfigRead;
@@ -320,6 +324,12 @@ begin
       '_send'+IntToStr(seSendBefore.Value)+'_'+FloatToStr(now)+'.log';
 end;
 
+procedure TfmMain.menuOpenLogClick(Sender: TObject);
+begin
+  if dlgOpen.Execute() then
+    GraphDrawer.OpenLogFile(dlgOpen.FileName);
+end;
+
 // ***** LOGIC *****
 
 function TfmMain.CalcMaxData: cardinal;
@@ -442,7 +452,8 @@ begin
   MaxChannels := Chart.SeriesCount;
   RefreshChannelsCheckbox;
   Config := TIniFile.Create(ExtractFilePath(Application.ExeName)+'config.ini');
-  IntFunc := TInterfaceFunc.Create(@sbMain.Panels[1].Text);
+  dlgOpen.InitialDir := ExtractFilePath(Application.ExeName);
+  IntFunc := TInterfaceFunc.Create(@sbMain, 1);
   ComGraph := TComGraph.Create(@IntFunc);
   GraphDrawer := TGraphDrawer.Create(@Chart, MaxChannels);
   ConfigRead;

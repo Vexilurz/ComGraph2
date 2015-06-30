@@ -16,3 +16,4 @@ src/__history/
 *.stat
 
 config.ini
+*.log

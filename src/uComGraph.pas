@@ -2,7 +2,7 @@ unit uComGraph;
 
 interface
 
-uses Windows, SysUtils, StdCtrls, Classes, uCom, uMemory, uGlobal;
+uses Forms, Windows, SysUtils, StdCtrls, Classes, uCom, uMemory, uGlobal;
 
 type
   PComboBox = ^TComboBox;
@@ -42,11 +42,48 @@ begin
 end;
 
 procedure TComGraph.SendAndGetData(SendByteBefore: byte);
+var
+  received: integer;
+  inputCount: integer;
+  freq, time, processMessagesTime, dt: int64;
+  processTime: real;
 begin
+  processTime := ComData.MaxData * 10 / 115200;
+  if processTime > 0.2 then
+  begin
+    QueryPerformanceFrequency(freq);
+    QueryPerformanceCounter(time);
+    dt := freq div 10;
+    processMessagesTime := time + dt;
+  end
+  else
+    freq := 0;
+
   if Com.isOpen then
   begin
     Com.SendByte(SendByteBefore);
-    Com.Get(ComData.Data^, ComData.MaxData);
+
+    received := 0;
+    while received < ComData.MaxData do
+    begin
+      inputCount := Com.InputCount;
+      if inputCount > 0 then
+      begin
+        Com.Get(PByteArray(@ComData.Data^[received])^, inputCount);
+        inc(received, inputCount);
+      end;
+
+      if freq <> 0 then
+      begin
+        QueryPerformanceCounter(time);
+        if processMessagesTime - time < 0 then
+        begin
+          processMessagesTime := processMessagesTime + dt;
+          Application.ProcessMessages;
+        end;
+      end;
+    end;
+//    Com.Get(ComData.Data^, ComData.MaxData);
   end;
 end;
 

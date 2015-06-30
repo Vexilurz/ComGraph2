@@ -16,6 +16,7 @@ type
 
     LogFile: textfile;
     LogXpos: cardinal;
+    isLogFileOpen: boolean;
   public
     InputData: PMemory;
     MaxVisibleData: cardinal;
@@ -34,6 +35,7 @@ type
     procedure DrawTick; // one tick to draw new data
     procedure NewLogFile(filename: string);
     procedure CloseLogFile;
+    procedure OpenLogFile(filename: string);
   end;
 
 implementation
@@ -55,6 +57,7 @@ begin
   LogsEnabled := true;
   self.Chart := Chart;
   LogXpos := 0;
+  isLogFileOpen := false;
 end;
 
 destructor TGraphDrawer.Destroy;
@@ -165,17 +168,46 @@ end;
 
 procedure TGraphDrawer.CloseLogFile;
 begin
-  try
+  if isLogFileOpen then
+  begin
     CloseFile(LogFile);
-  except else end;
+    isLogFileOpen := false;
+  end;
 end;
 
 procedure TGraphDrawer.NewLogFile(filename: string);
 begin
   CloseLogFile;
-  AssignFile(LogFile, filename);
-  Rewrite(LogFile);
-  LogXpos := 0;
+  if not isLogFileOpen then
+  begin
+    AssignFile(LogFile, filename);
+    Rewrite(LogFile);
+    isLogFileOpen := true;
+    LogXpos := 0;
+  end;
+end;
+
+procedure TGraphDrawer.OpenLogFile(filename: string);
+var
+  f: textfile;
+  i, x: integer;
+  y: array [0..3] of integer; // todo
+begin
+  if FileExists(filename) then
+  begin
+    for i := 0 to MaxChannels-1 do
+      Chart.Series[i].Clear;
+    AssignFile(f, filename);
+    Reset(f);
+      while not eof(f) do
+      begin
+        ReadLn(f, x, y[0], y[1], y[2], y[3]); // todo
+        for i := 0 to MaxChannels-1 do
+          Chart.Series[i].AddXY(x, y[i]);
+      end;
+      Chart.BottomAxis.SetMinMax(0, x);
+    CloseFile(f);
+  end;
 end;
 
 end.

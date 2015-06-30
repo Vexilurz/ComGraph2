@@ -2,7 +2,7 @@ unit uGlobal;
 
 interface
 
-uses Windows, SysUtils;
+uses Windows, SysUtils, ComCtrls;
 
 const
   StatusMessages : array [0..5] of string = (
@@ -23,14 +23,15 @@ type
     stDataExchange
   );
 
-  PString = ^string;
+  PStatusBar = ^TStatusBar;
 
   PInterfaceFunc = ^TInterfaceFunc;
   TInterfaceFunc = class
   private
-    FStatus: PString;
+    FStatusBar: PStatusBar;
+    FPanelIndex: byte;
   public
-    constructor Create(Status: PString);
+    constructor Create(StatusBar: PStatusBar; PanelIndex: byte);
     destructor Destroy; override;
 
     procedure SetStatus(value: TStatusMessages);
@@ -38,10 +39,11 @@ type
 
 implementation
 
-constructor TInterfaceFunc.Create(Status: PString);
+constructor TInterfaceFunc.Create(StatusBar: PStatusBar; PanelIndex: byte);
 begin
   inherited Create;
-  FStatus := Status;
+  FStatusBar := StatusBar;
+  FPanelIndex := PanelIndex;
 end;
 
 destructor TInterfaceFunc.Destroy;
@@ -52,7 +54,7 @@ end;
 
 procedure TInterfaceFunc.SetStatus(value: TStatusMessages);
 begin
-  FStatus^ := StatusMessages[integer(value)];
+  FStatusBar.Panels[FPanelIndex].Text := StatusMessages[integer(value)];
 end;
 
 end.
