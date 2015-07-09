@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, TeEngine, Series, TeeProcs, Chart, ExtCtrls, ComCtrls, ToolWin, Menus,
   ImgList, StdCtrls, Buttons, Spin, uCom, uComGraph, uGraphDrawer, uMemory,
-  uGlobal, IniFiles, uBuildInfo;
+  uGlobal, IniFiles, uBuildInfo, pngimage;
 
 type
   TfmMain = class(TForm)
@@ -17,7 +17,6 @@ type
     sbMain: TStatusBar;
     Panel1: TPanel;
     Panel2: TPanel;
-    Splitter1: TSplitter;
     Chart: TChart;
     Series1: TFastLineSeries;
     Series2: TFastLineSeries;
@@ -72,6 +71,8 @@ type
     bnOpenLog: TToolButton;
     menuOpenLog: TMenuItem;
     dlgOpen: TOpenDialog;
+    Splitter1: TSplitter;
+    Image1: TImage;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -460,6 +461,7 @@ begin
   bnComRefresh.Click;
   Caption := Caption + ' Build '+GetBuild(Application.ExeName)+
     '. Vexilurz (c) Measurements Systems.';
+//  image1.Picture.Bitmap.TransparentColor := clWhite;
 end;
 
 procedure TfmMain.FormClose(Sender: TObject; var Action: TCloseAction);
