@@ -122,9 +122,16 @@ begin
       begin
         //Chart.Series[i].BeginUpdate;
         if VisibleDataIndex < Chart.Series[i].Count then
-          Chart.Series[i].YValue[VisibleDataIndex] := ChannelData[i]
+        begin
+          Chart.Series[i].YValue[VisibleDataIndex] := ChannelData[i];
+          if i = 1 then
+          Chart.Series[MaxChannels].YValue[VisibleDataIndex] :=
+            sqrt(ChannelData[i]*ChannelData[i] + ChannelData[i-1]*ChannelData[i-1]);
+        end
         else
+        begin
           Chart.Series[i].AddY(ChannelData[i]);
+        end;
         //Chart.Series[i].EndUpdate;
         LogStr := LogStr + IntToStr(ChannelData[i])+#9;
       end;
@@ -148,13 +155,22 @@ begin
         begin
           try
             Chart.Series[i].Delete(0);
+            if i = 1 then
+              Chart.Series[MaxChannels].Delete(0);
           except else
           end;
         end;
         Chart.Series[i].AddXY(Chart.Series[i].Count, ChannelData[i]);
+        if i = 1 then
+          Chart.Series[MaxChannels].AddXY(Chart.Series[i].Count,
+            sqrt(ChannelData[i]*ChannelData[i] + ChannelData[i-1]*ChannelData[i-1]));
         LogStr := LogStr + IntToStr(ChannelData[i])+#9;
         for j := 0 to Chart.Series[i].Count - 1 do
+        begin
           Chart.Series[i].XValue[j] := j;
+          if i = 1 then
+            Chart.Series[MaxChannels].XValue[j] := j;
+        end;
         Chart.Series[i].EndUpdate;
       end;
       if LogsEnabled then

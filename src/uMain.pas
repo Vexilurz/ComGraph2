@@ -141,7 +141,7 @@ var
   i: integer;
   obj: TComponent;
 begin
-  for i := 1 to MaxChannels do
+  for i := 1 to MaxChannels+1 do
   begin
     obj := FindComponent('Series'+IntToStr(i));
     if obj <> nil then
@@ -352,7 +352,7 @@ begin
   lbMaxData.Caption := 'Max visible data = ' + IntToStr(tbMaxVisibleData.Position);
   GraphDrawer.MaxVisibleData := tbMaxVisibleData.Position;
   Chart.BottomAxis.SetMinMax(0, tbMaxVisibleData.Position-1);
-  for i := 0 to MaxChannels-1 do
+  for i := 0 to MaxChannels do
   begin
     Chart.Series[i].BeginUpdate;
     for j := 0 to Chart.Series[i].Count - GraphDrawer.MaxVisibleData - 1 do
@@ -454,7 +454,7 @@ end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
 begin
-  MaxChannels := Chart.SeriesCount;
+  MaxChannels := Chart.SeriesCount-1;
   RefreshChannelsCheckbox;
   Config := TIniFile.Create(ExtractFilePath(Application.ExeName)+'config.ini');
   dlgOpen.InitialDir := ExtractFilePath(Application.ExeName);
