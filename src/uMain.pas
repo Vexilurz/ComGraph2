@@ -73,6 +73,8 @@ type
     dlgOpen: TOpenDialog;
     Splitter1: TSplitter;
     Image1: TImage;
+    cbSqrt: TCheckBox;
+    Series5: TFastLineSeries;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -216,6 +218,8 @@ begin
     if obj <> nil then
       Chart.Series[i-1].Active := (obj as TCheckBox).Checked;
   end;
+  Chart.Series[MaxChannels].Active := cbSqrt.Checked;   // !!!
+
 end;
 procedure TfmMain.cbChannel1Click(Sender: TObject);
 begin

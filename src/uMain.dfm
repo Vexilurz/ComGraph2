@@ -48,7 +48,6 @@ object fmMain: TfmMain
     Caption = 'tbMain'
     Images = ilToolBar
     TabOrder = 0
-    ExplicitWidth = 931
     object bnSquareDiscrete: TToolButton
       Left = 0
       Top = 0
@@ -129,8 +128,6 @@ object fmMain: TfmMain
         Text = 'Ready'
         Width = 50
       end>
-    ExplicitTop = 642
-    ExplicitWidth = 931
   end
   object Panel1: TPanel
     Left = 0
@@ -1159,6 +1156,23 @@ object fmMain: TfmMain
       TabOrder = 19
       Value = 1
     end
+    object cbSqrt: TCheckBox
+      Left = 305
+      Top = 85
+      Width = 108
+      Height = 17
+      Caption = 'sqrt(A^2 + B^2)'
+      Checked = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clOlive
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      State = cbChecked
+      TabOrder = 20
+      OnClick = cbChannel1Click
+    end
   end
   object Panel2: TPanel
     Left = 0
@@ -1167,9 +1181,6 @@ object fmMain: TfmMain
     Height = 480
     Align = alClient
     TabOrder = 3
-    ExplicitLeft = 704
-    ExplicitWidth = 227
-    ExplicitHeight = 188
     object Chart: TChart
       Left = 1
       Top = 1
@@ -1188,8 +1199,6 @@ object fmMain: TfmMain
       View3DOptions.Orthogonal = False
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 765
-      ExplicitHeight = 583
       PrintMargins = (
         15
         8
@@ -1245,6 +1254,19 @@ object fmMain: TfmMain
         YValues.Name = 'Y'
         YValues.Order = loNone
       end
+      object Series5: TFastLineSeries
+        Marks.Arrow.Visible = True
+        Marks.Callout.Brush.Color = clBlack
+        Marks.Callout.Arrow.Visible = True
+        Marks.Visible = False
+        SeriesColor = clPurple
+        LinePen.Color = clPurple
+        LinePen.Width = 2
+        XValues.Name = 'X'
+        XValues.Order = loAscending
+        YValues.Name = 'Y'
+        YValues.Order = loNone
+      end
     end
     object tbMaxVisibleData: TTrackBar
       Left = 1
@@ -1260,8 +1282,6 @@ object fmMain: TfmMain
       ShowSelRange = False
       TabOrder = 1
       OnChange = tbMaxVisibleDataChange
-      ExplicitTop = 584
-      ExplicitWidth = 765
     end
   end
   object MainMenu1: TMainMenu
@@ -1315,7 +1335,7 @@ object fmMain: TfmMain
     Left = 464
     Top = 104
     Bitmap = {
-      494C01010900E801400110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010900E801440110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
