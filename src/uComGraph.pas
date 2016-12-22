@@ -17,7 +17,7 @@ type
     destructor Destroy; override;
 
     procedure RefreshComList(ComboBox: PComboBox);
-    procedure StartComSession(ComName: string);
+    procedure StartComSession(ComName: string; BaudRate: integer);
     procedure EndComSession;
     procedure SendAndGetData(SendByteBefore: byte);
   end;
@@ -87,7 +87,7 @@ begin
   end;
 end;
 
-procedure TComGraph.StartComSession(ComName: string);
+procedure TComGraph.StartComSession(ComName: string; BaudRate: integer);
 begin
   IntFunc.SetStatus(stComOpen);
   if Com.isOpen and (Com.ComName <> ComName) then
@@ -96,6 +96,7 @@ begin
   if not Com.isOpen then
   begin
     Com.ComName := ComName;
+    Com.baudrate := BaudRate;
     Com.Open;
   end;
 end;

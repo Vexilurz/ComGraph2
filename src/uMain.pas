@@ -75,6 +75,9 @@ type
     Image1: TImage;
     cbSqrt: TCheckBox;
     Series5: TFastLineSeries;
+    Label10: TLabel;
+    Label11: TLabel;
+    seBaudRate: TSpinEdit;
     procedure menuExitClick(Sender: TObject);
     procedure bnComRefreshClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -253,6 +256,7 @@ begin
   with Config do
   begin
     WriteString (cComGraph,'COM',cbCOM.Text);
+    WriteInteger(cComGraph,'BaudRate',seBaudRate.Value);
     WriteInteger(cComGraph,'Send',seSendBefore.Value);
     WriteInteger(cComGraph,'Channels',ChannelsCount);
     WriteInteger(cComGraph,'Values',ValuesCount);
@@ -282,6 +286,7 @@ begin
   with Config do
   begin
     cbCOM.Text := ReadString(cComGraph,'COM','COM1');
+    seBaudRate.Value := ReadInteger(cComGraph,'BaudRate',115200);
     seSendBefore.Value := ReadInteger(cComGraph,'Send',2);
     cbChannelsCount.ItemIndex := ReadInteger(cComGraph,'Channels',1)-1;
     seValuesCount.Value := ReadInteger(cComGraph,'Values',1);
@@ -400,7 +405,7 @@ end;
 procedure TfmMain.bnSingleReqClick(Sender: TObject);
 begin
   SetFields;
-  ComGraph.StartComSession(cbCOM.text);
+  ComGraph.StartComSession(cbCOM.text, seBaudRate.Value);
   if GraphDrawer.LogsEnabled then
     GraphDrawer.NewLogFile(GetLogFileName);
   WorkOnce;
@@ -432,7 +437,7 @@ begin
   else
   begin
     if not ComGraph.Com.isOpen then
-      ComGraph.StartComSession(cbCOM.text);
+      ComGraph.StartComSession(cbCOM.text, seBaudRate.Value);
     if ComGraph.Com.isOpen then
     begin
       with bnStartStop do

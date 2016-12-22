@@ -38,6 +38,13 @@ object fmMain: TfmMain
     ExplicitTop = 29
     ExplicitWidth = 499
   end
+  object Label10: TLabel
+    Left = 8
+    Top = 101
+    Width = 65
+    Height = 13
+    Caption = 'Values count:'
+  end
   object ToolBar1: TToolBar
     Left = 0
     Top = 0
@@ -850,6 +857,13 @@ object fmMain: TfmMain
         551945851A36E6FE0FEB2C680307AA385D0000000049454E44AE426082}
       ExplicitHeight = 170
     end
+    object Label11: TLabel
+      Left = 305
+      Top = 105
+      Width = 51
+      Height = 13
+      Caption = 'BaudRate:'
+    end
     object cbCOM: TComboBox
       Left = 8
       Top = 25
@@ -1173,6 +1187,16 @@ object fmMain: TfmMain
       TabOrder = 20
       OnClick = cbChannel1Click
     end
+    object seBaudRate: TSpinEdit
+      Left = 302
+      Top = 120
+      Width = 121
+      Height = 22
+      MaxValue = 0
+      MinValue = 0
+      TabOrder = 21
+      Value = 115200
+    end
   end
   object Panel2: TPanel
     Left = 0
@@ -1335,7 +1359,7 @@ object fmMain: TfmMain
     Left = 464
     Top = 104
     Bitmap = {
-      494C01010900E801440110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010900E801480110001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
